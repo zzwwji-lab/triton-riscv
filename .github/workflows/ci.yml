@@ -60,8 +60,16 @@ jobs:
           echo "LLVM_SYSPATH=${GITHUB_WORKSPACE}/.cache/llvm" >> "$GITHUB_ENV"
           echo "BUDDY_MLIR_BINARY_DIR=${GITHUB_WORKSPACE}/.cache/buddy/bin" >> "$GITHUB_ENV"
 
+      - name: Run lit test
+        run: |
+          BUILD_DIR="$(find triton/build -maxdepth 1 -type d -name 'cmake.*' -print -quit)"
+          if [ -z "${BUILD_DIR}" ]; then
+            echo "Could not find Triton CMake build directory"
+            exit 1
+          fi
+          cmake --build "${BUILD_DIR}" --target check-triton-shared-lit-tests
+
       - name: Run example test suite
-        continue-on-error: true
         run: |
           cd triton
           ../.venv/bin/python -m pytest ../python/examples/ \
